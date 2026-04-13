@@ -70,8 +70,8 @@
 4. **Provide credentials** when prompted:
    - Check Point user and password
    - Expert password (for Check Point Expert mode)
-   - Palo Alto user and password
-   - Cisco switch user and password
+   - Palo Alto user and password (or hit Enter to reuse CP credentials)
+   - Cisco switch user and password (or hit Enter to reuse PA credentials)
 
 5. **Review results**:
    - Console output displays scan progress
@@ -87,24 +87,38 @@
 
 ### Network Trace Flow
 
-```
-Firewall (PA/CP)
+**Palo Alto Trace Flow (L2/L3 Hop Tracing):**
+```text
+Palo Alto Firewall
     ↓
-[Extract MAC, Default Gateway]
+[Extract Mgmt MAC & Default Gateway]
     ↓
-Default Gateway Switch (L2)
+Connect to Default Gateway Switch
     ↓
-[Query MAC Table]
+[Query L2 MAC Table / Fallback to L3 ARP Table]
     ↓
-[Find CDP Neighbor]
+[Find CDP Neighbor] -> Hop to Next Switch
     ↓
-Next Switch in Chain
-    ↓
-[Loop Detection/Mitigation]
+[Loop Detection & Mitigation if needed]
     ↓
 Edge Switch Reached
     ↓
 [Report Target Device Details]
+```
+
+**Check Point Trace Flow (Direct CDP Capture):**
+```text
+Check Point Firewall
+    ↓
+[Authenticate into Expert Mode]
+    ↓
+[Listen via tcpdump for CDP Packets on Interface]
+    ↓
+[Capture CDP Broadcast (ether[20:2] == 0x2000)]
+    ↓
+[Parse Packet for Neighbor ID, Port, Platform]
+    ↓
+[Report Adjacent Edge Switch Details]
 ```
 
 ## Output Files
